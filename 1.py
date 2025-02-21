@@ -21,12 +21,13 @@ class OptimizationResult:
 def optimize_printing(print_jobs: List[PrintJob], constraints: PrinterConstraints) -> OptimizationResult:
     result = OptimizationResult([], 0)
 
-    sorted_jobs = sorted(print_jobs, key=lambda job: (job.priority, -job.volume, job.print_time))
-
     current_volume = 0
     current_items = 0
 
-    for job in sorted_jobs:
+    while print_jobs:
+        highest_priority = min([job.priority for job in print_jobs])
+        job = [job for job in print_jobs if job.priority == highest_priority][0]
+
         if current_items < constraints.max_items and current_volume + job.volume <= constraints.max_volume:
             current_volume += job.volume
             current_items += 1
@@ -37,6 +38,7 @@ def optimize_printing(print_jobs: List[PrintJob], constraints: PrinterConstraint
             current_items = 1
 
         result.print_order.append(job.id)
+        print_jobs.remove(job)
 
     return result
 
